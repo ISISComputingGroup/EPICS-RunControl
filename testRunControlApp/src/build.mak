@@ -39,6 +39,7 @@ $(APPNAME)_LIBS += autosave
 $(APPNAME)_LIBS += utilities
 ## Add other libraries here ##
 $(APPNAME)_LIBS += std
+$(APPNAME)_LIBS += asyn
 
 # testRunControl_registerRecordDeviceDriver.cpp derives from testRunControl.dbd
 $(APPNAME)_SRCS += $(APPNAME)_registerRecordDeviceDriver.cpp
