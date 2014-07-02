@@ -1,0 +1,69 @@
+record(ao, "$(PV):RC:HIGH")
+{
+    field(DESC, "Run control high limit")
+#	field(HIGH, "")
+#	field(HSV, "MINOR")
+}
+
+record(ao, "$(PV):RC:LOW")
+{
+    field(DESC, "Run control low limit")
+#	field(LOW)
+}
+
+record(bo, "$(PV):RC:ENABLE")
+{
+    field(DESC, "Run control enable")
+	field(ZNAM, "NO")
+	field(ONAM, "YES")
+	field(VAL, 0)
+	field(FLNK, "$(PV):RC:_CALC")
+}
+
+record(bi, "$(PV):RC:INRANGE")
+{
+    field(DESC, "Run control in range")
+	field(ZNAM, "NO")
+	field(ONAM, "YES")
+	field(VAL, 1)
+}
+
+record(bo, "$(PV):RC:_CALCSCAN")
+{
+    field(SCAN, "1 second")
+	field(FLNK, "$(PV):RC:_CALC")
+	field(SDIS, "$(PV):RC:ENABLE")
+	field(DISV, "0")
+}
+
+# for a selection record: 56 means fire output 4 5 6; 7 means fire outputs 1 2 3
+# for a selection record: 12 means fire output 3 4; 3 means fire outputs 1 2
+record(calcout, "$(PV):RC:_CALC")
+{
+    field(INPA, "$(PV)")
+    field(INPB, "$(PV):RC:LOW")
+    field(INPC, "$(PV):RC:HIGH")
+    field(INPD, "$(PV):RC:ENABLE")
+	field(CALC, "((D = 0) || (A >= B && A <= C)) ? 12 : 3")
+	field(OOPT, "Every Time")
+	field(DOPT, "Use CALC")
+	field(OUT, "$(PV):RC:_SEQ.SELN")
+	field(FLNK, "$(PV):RC:_SEQ.PROC")
+}	
+
+# use sseq + CA and Wait to ensure no messages are lost	
+record(sseq, "$(PV):RC:_SEQ")
+{
+    field(SELM, "Mask")
+	field(STR1, "NO")
+	field(STR2, "$(PV)")
+	field(STR3, "YES")
+	field(STR4, "$(PV)")
+	field(LNK1, "$(PV):RC:INRANGE PP")
+	field(LNK2, "$(P)CS:RC:_OUT CA")
+	field(LNK3, "$(PV):RC:INRANGE PP")
+	field(LNK4, "$(P)CS:RC:_IN CA")
+    field(WAIT2, "Wait")
+    field(WAIT4, "Wait")
+}
+

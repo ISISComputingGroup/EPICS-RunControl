@@ -1,0 +1,12 @@
+
+record(ao, "$(P)$(N)")
+{
+}
+
+record(calcout, "$(P)$(N):_CALC")
+{
+    field(SCAN, "1 second")
+    field(INPA, "$(P)$(N)")
+	field(CALC, "((A + 1) % 10)")
+	field(OUT, "$(P)$(N) PP")
+}
