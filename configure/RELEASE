@@ -46,7 +46,7 @@ PCRE=$(SUPPORT)/pcre
 MYSQL=$(SUPPORT)/MySQL
 ZLIB=$(SUPPORT)/zlib/1-2-8
 STD=$(SUPPORT)/std/R3_1
-ASYN=$(SUPPORT)/asyn/4-22
+ASYN=$(SUPPORT)/asyn/4-26
 ONCRPC=$(SUPPORT)/oncrpc/2
 
 ## add other modules here ##
