@@ -1,6 +1,7 @@
 record(ao, "$(PV):RC:HIGH")
 {
     field(DESC, "Run control high limit")
+    info(autosaveFields, "VAL")
 #	field(HIGH, "")
 #	field(HSV, "MINOR")
 }
@@ -8,6 +9,7 @@ record(ao, "$(PV):RC:HIGH")
 record(ao, "$(PV):RC:LOW")
 {
     field(DESC, "Run control low limit")
+    info(autosaveFields, "VAL")
 #	field(LOW)
 }
 
@@ -18,6 +20,7 @@ record(bo, "$(PV):RC:ENABLE")
 	field(ONAM, "YES")
 	field(VAL, 0)
 	field(FLNK, "$(PV):RC:_CALC")
+    info(autosaveFields, "VAL")
 }
 
 record(bi, "$(PV):RC:INRANGE")
