@@ -24,6 +24,7 @@ testRunControl_registerRecordDeviceDriver pdbbase
 dbLoadRecords("db/testRunControl.db","P=$(MYPVPREFIX),N=TEST1")
 dbLoadRecords("db/testRunControl.db","P=$(MYPVPREFIX),N=TEST2")
 # add run control
+dbLoadRecords("db/runcontrolMgr.db","P=$(MYPVPREFIX)")
 dbLoadRecords("db/runcontrol.db","P=$(MYPVPREFIX),PV=$(MYPVPREFIX)TEST1")
 dbLoadRecords("db/runcontrol.db","P=$(MYPVPREFIX),PV=$(MYPVPREFIX)TEST2")
 

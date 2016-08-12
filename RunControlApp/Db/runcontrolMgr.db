@@ -1,0 +1,87 @@
+## name of set, stored in a PV as need to used as INLINK 
+record(stringin, "$(P)CS:RC:_SETNAME")
+{
+	field(VAL, "RC")
+}	
+
+record(aSub, "$(P)CS:RC:_OUT:CNT")
+{
+    field(SNAM, "getSetItemCount")
+	field(INPA, "$(P)CS:RC:_SETNAME")
+	field(FTA, "STRING")
+	field(OUTA, "$(P)CS:RC:OUT:CNT PP")
+	field(FTVA, "ULONG")
+	field(FLNK, "$(P)CS:RC:_CALC.PROC")
+} 
+
+record(longin, "$(P)CS:RC:OUT:CNT")
+{
+    field(VAL, "0")
+	info(archive, "VAL")
+}
+
+record(bi, "$(P)CS:RC:INRANGE")
+{
+    field(VAL, "1")
+    field(ZNAM, "NO")
+    field(ONAM, "YES")
+}
+
+# use a calcout record to avoid writing to OUT:LIST too often and triggering unnecessary monitors  
+record(calcout, "$(P)CS:RC:_CALC")
+{
+    field(INPA, "$(P)CS:RC:OUT:CNT")
+	field(CALC, "A")
+	field(OOPT, "On Change")
+	field(DOPT, "Use CALC")
+	field(OUT, "$(P)CS:RC:_CALC2.PROC PP")
+}	
+
+record(calcout, "$(P)CS:RC:_CALC2")
+{
+    field(INPA, "$(P)CS:RC:OUT:CNT")
+	field(CALC, "A > 0 ? 0 : 1")
+	field(OOPT, "Every Time")
+	field(DOPT, "Use CALC")
+	field(OUT, "$(P)CS:RC:INRANGE PP")
+	field(FLNK, "$(P)CS:RC:_CALC3.PROC")
+}	
+
+record(calcout, "$(P)CS:RC:_CALC3")
+{
+    field(INPA, "$(P)CS:RC:OUT:CNT")
+	field(CALC, "A > 0 ? 5 : 3")
+	field(OOPT, "Every Time")
+	field(DOPT, "Use CALC")
+	field(OUT, "$(P)CS:RC:_SEQ.SELN")
+	field(FLNK, "$(P)CS:RC:_SEQ.PROC")
+}	
+
+record(seq, "$(P)CS:RC:_SEQ")
+{
+    field(SELM, "Mask")
+	field(DO1, 1)
+	field(DO2, 1)
+	field(DO3, 1)
+	field(LNK1, "$(P)CS:RC:_OUT:LIST.PROC PP")
+	field(LNK2, "$(P)DAE:ENDSEWAIT PP")
+	field(LNK3, "$(P)DAE:STARTSEWAIT PP")
+}
+
+record(aSub, "$(P)CS:RC:_OUT:LIST")
+{
+    field(SNAM, "getSetItems")
+	field(INPA, "$(P)CS:RC:_SETNAME")
+	field(FTA, "STRING")
+	field(OUTA, "$(P)CS:RC:OUT:LIST PP")
+	field(FTVA, "CHAR")
+	field(NOVA, "4096")
+	field(FTVB, "ULONG")
+} 
+
+record(waveform, "$(P)CS:RC:OUT:LIST")
+{
+	field(NELM, "4096")
+	field(FTVL, "CHAR")
+}
+

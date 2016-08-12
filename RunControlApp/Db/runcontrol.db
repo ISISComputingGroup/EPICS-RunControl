@@ -4,6 +4,7 @@ record(ao, "$(PV):RC:HIGH")
     info(autosaveFields, "VAL")
 #	field(HIGH, "")
 #	field(HSV, "MINOR")
+	info(archive, "VAL")
 }
 
 record(ao, "$(PV):RC:LOW")
@@ -11,6 +12,7 @@ record(ao, "$(PV):RC:LOW")
     field(DESC, "Run control low limit")
     info(autosaveFields, "VAL")
 #	field(LOW)
+	info(archive, "VAL")
 }
 
 record(bo, "$(PV):RC:ENABLE")
@@ -21,6 +23,7 @@ record(bo, "$(PV):RC:ENABLE")
 	field(VAL, 0)
 	field(FLNK, "$(PV):RC:_CALC")
     info(autosaveFields, "VAL")
+	info(archive, "VAL")
 }
 
 record(bi, "$(PV):RC:INRANGE")
@@ -29,14 +32,15 @@ record(bi, "$(PV):RC:INRANGE")
 	field(ZNAM, "NO")
 	field(ONAM, "YES")
 	field(VAL, 1)
+	info(archive, "VAL")
 }
 
 record(bo, "$(PV):RC:_CALCSCAN")
 {
     field(SCAN, "1 second")
-	field(FLNK, "$(PV):RC:_CALC")
 	field(SDIS, "$(PV):RC:ENABLE")
 	field(DISV, "0")
+	field(FLNK, "$(PV):RC:_CALC")
 }
 
 # for a selection record: 56 means fire output 4 5 6; 7 means fire outputs 1 2 3
@@ -54,7 +58,6 @@ record(calcout, "$(PV):RC:_CALC")
 	field(FLNK, "$(PV):RC:_SEQ.PROC")
 }	
 
-# use sseq + CA and Wait to ensure no messages are lost	
 record(sseq, "$(PV):RC:_SEQ")
 {
     field(SELM, "Mask")
@@ -63,10 +66,50 @@ record(sseq, "$(PV):RC:_SEQ")
 	field(STR3, "YES")
 	field(STR4, "$(PV)")
 	field(LNK1, "$(PV):RC:INRANGE PP")
-	field(LNK2, "$(P)CS:RC:_OUT CA")
+	field(LNK2, "$(PV):RC:_OUT PP")
 	field(LNK3, "$(PV):RC:INRANGE PP")
-	field(LNK4, "$(P)CS:RC:_IN CA")
-    field(WAIT2, "Wait")
-    field(WAIT4, "Wait")
+	field(LNK4, "$(PV):RC:_IN PP")
 }
 
+
+## this is set externally by RunControl
+record(waveform, "$(PV):RC:_OUT")
+{
+	field(NELM, "256")
+	field(FTVL, "CHAR")
+	field(FLNK, "$(PV):RC:_OUT:DO.PROC")
+}	
+
+record(aSub, "$(PV):RC:_OUT:DO")
+{
+    field(SNAM, "addToSet")
+	field(INPA, "$(P)CS:RC:_SETNAME")
+	field(FTA, "STRING")
+	field(INPB, "$(PV):RC:_OUT")
+	field(FTB, "CHAR")
+	field(NOB, "256")
+	field(INPC, "$(PV):RC:_OUT.NELM") # NORD not set by CA
+	field(FTC, "ULONG")
+	field(FLNK, "$(P)CS:RC:_OUT:CNT.PROC")
+}
+
+## this is set externally by RunControl
+record(waveform, "$(PV):RC:_IN")
+{
+	field(NELM, "256")
+	field(FTVL, "CHAR")
+	field(FLNK, "$(PV):RC:_IN:DO.PROC")
+}	
+
+record(aSub, "$(PV):RC:_IN:DO")
+{
+    field(SNAM, "removeFromSet")
+	field(INPA, "$(P)CS:RC:_SETNAME")
+	field(FTA, "STRING")
+	field(INPB, "$(PV):RC:_IN")
+	field(FTB, "CHAR")
+	field(NOB, "256")
+	field(INPC, "$(PV):RC:_IN.NELM") # NORD not set by CA
+	field(FTC, "ULONG")
+	field(FLNK, "$(P)CS:RC:_OUT:CNT.PROC")
+}
