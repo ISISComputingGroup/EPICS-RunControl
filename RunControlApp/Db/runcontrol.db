@@ -2,8 +2,6 @@ record(ao, "$(PV):RC:HIGH")
 {
     field(DESC, "Run control high limit")
     info(autosaveFields, "VAL")
-#	field(HIGH, "")
-#	field(HSV, "MINOR")
 	info(archive, "VAL")
 }
 
@@ -11,7 +9,6 @@ record(ao, "$(PV):RC:LOW")
 {
     field(DESC, "Run control low limit")
     info(autosaveFields, "VAL")
-#	field(LOW)
 	info(archive, "VAL")
 }
 
@@ -35,6 +32,7 @@ record(bi, "$(PV):RC:INRANGE")
 	info(archive, "VAL")
 }
 
+## only scan if run control enabled
 record(bo, "$(PV):RC:_CALCSCAN")
 {
     field(SCAN, "1 second")
@@ -43,15 +41,15 @@ record(bo, "$(PV):RC:_CALCSCAN")
 	field(FLNK, "$(PV):RC:_CALC")
 }
 
-# for a selection record: 56 means fire output 4 5 6; 7 means fire outputs 1 2 3
-# for a selection record: 12 means fire output 3 4; 3 means fire outputs 1 2
+## for a selection record: 56 means fire output 4 5 6; 7 means fire outputs 1 2 3
+## for a selection record: 12 means fire output 3 4; 3 means fire outputs 1 2
 record(calcout, "$(PV):RC:_CALC")
 {
     field(INPA, "$(PV)")
     field(INPB, "$(PV):RC:LOW")
     field(INPC, "$(PV):RC:HIGH")
     field(INPD, "$(PV):RC:ENABLE")
-	field(CALC, "((D = 0) || (A >= B && A <= C)) ? 12 : 3")
+	field(CALC, "((D=0)||(A>=B&&A<=C))?12:3")
 	field(OOPT, "Every Time")
 	field(DOPT, "Use CALC")
 	field(OUT, "$(PV):RC:_SEQ.SELN")
@@ -71,8 +69,6 @@ record(sseq, "$(PV):RC:_SEQ")
 	field(LNK4, "$(PV):RC:_IN PP")
 }
 
-
-## this is set externally by RunControl
 record(waveform, "$(PV):RC:_OUT")
 {
 	field(NELM, "256")
@@ -93,7 +89,6 @@ record(aSub, "$(PV):RC:_OUT:DO")
 	field(FLNK, "$(P)CS:RC:_OUT:CNT.PROC")
 }
 
-## this is set externally by RunControl
 record(waveform, "$(PV):RC:_IN")
 {
 	field(NELM, "256")

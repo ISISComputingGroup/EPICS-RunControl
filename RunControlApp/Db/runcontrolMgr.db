@@ -4,6 +4,15 @@ record(stringin, "$(P)CS:RC:_SETNAME")
 	field(VAL, "RC")
 }	
 
+## This is useful if you are moving between SECI and IBEX
+## It forces a re-issue of the current IBEX view of run control
+## which can then override e.g. a previous WAITING state set by SECI
+record(bo, "$(P)CS:RC:SYNC:SP")
+{
+    field(DESC, "Sync Run Control status")
+	field(FLNK, "$(P)CS:RC:_CALC2.PROC")
+}
+
 record(aSub, "$(P)CS:RC:_OUT:CNT")
 {
     field(SNAM, "getSetItemCount")
@@ -84,4 +93,3 @@ record(waveform, "$(P)CS:RC:OUT:LIST")
 	field(NELM, "4096")
 	field(FTVL, "CHAR")
 }
-
