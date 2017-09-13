@@ -1,6 +1,7 @@
 record(ao, "$(PV):RC:HIGH")
 {
     field(DESC, "Run control high limit")
+	field(PREC, "2")
     info(autosaveFields, "VAL")
 	info(archive, "VAL")
 }
@@ -8,6 +9,7 @@ record(ao, "$(PV):RC:HIGH")
 record(ao, "$(PV):RC:LOW")
 {
     field(DESC, "Run control low limit")
+	field(PREC, "2")
     info(autosaveFields, "VAL")
 	info(archive, "VAL")
 }
