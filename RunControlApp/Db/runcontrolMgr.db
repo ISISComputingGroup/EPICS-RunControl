@@ -7,6 +7,7 @@ record(stringin, "$(P)CS:RC:_SETNAME")
 ## This is useful if you are moving between SECI and IBEX
 ## It forces a re-issue of the current IBEX view of run control
 ## which can then override e.g. a previous WAITING state set by SECI
+## it is also now used by $(P)CS:RC:_CHECK
 record(bo, "$(P)CS:RC:SYNC:SP")
 {
     field(DESC, "Sync Run Control status")
@@ -34,9 +35,11 @@ record(bi, "$(P)CS:RC:INRANGE")
     field(VAL, "1")
     field(ZNAM, "NO")
     field(ONAM, "YES")
+	info(archive, "VAL")
 }
 
-# use a calcout record to avoid writing to OUT:LIST too often and triggering unnecessary monitors  
+# use a calcout record to avoid writing to OUT:LIST too often 
+# and triggering unnecessary monitors  
 record(calcout, "$(P)CS:RC:_CALC")
 {
     field(INPA, "$(P)CS:RC:OUT:CNT")
@@ -92,4 +95,19 @@ record(waveform, "$(P)CS:RC:OUT:LIST")
 {
 	field(NELM, "4096")
 	field(FTVL, "CHAR")
+}
+
+## perform a periodic check that a run control message to DAE did not get lost 
+## RUNNING is run state number 2 and WAITING is 4 (see isisdae.db)
+## we archive VAL so we could see how often it is needed
+record(calcout, "$(P)CS:RC:_CHECK")
+{
+    field(INPA, "$(P)DAE:RUNSTATE NPP")
+	field(INPB, "$(P)CS:RC:OUT:CNT NPP")
+	field(CALC, "((A=4)&&(B=0))||((A=2)&&(B>0))")
+	field(OOPT, "When Non-zero")
+	field(DOPT, "Use CALC")
+	field(OUT, "$(P)CS:RC:SYNC:SP PP")
+	field(SCAN, "5 second")
+	info(archive, "VAL")
 }
