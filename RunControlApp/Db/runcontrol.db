@@ -3,7 +3,6 @@ record(ao, "$(PV):RC:HIGH")
     field(DESC, "Run control high limit")
 	field(PREC, "2")
     info(autosaveFields, "VAL")
-	info(archive, "VAL")
 }
 
 record(ao, "$(PV):RC:LOW")
@@ -11,7 +10,6 @@ record(ao, "$(PV):RC:LOW")
     field(DESC, "Run control low limit")
 	field(PREC, "2")
     info(autosaveFields, "VAL")
-	info(archive, "VAL")
 }
 
 record(bo, "$(PV):RC:ENABLE")
@@ -22,7 +20,6 @@ record(bo, "$(PV):RC:ENABLE")
 	field(VAL, 0)
 	field(FLNK, "$(PV):RC:_CALC")
     info(autosaveFields, "VAL")
-	info(archive, "VAL")
 }
 
 record(bi, "$(PV):RC:INRANGE")
@@ -31,7 +28,6 @@ record(bi, "$(PV):RC:INRANGE")
 	field(ZNAM, "NO")
 	field(ONAM, "YES")
 	field(VAL, 1)
-	info(archive, "VAL")
 }
 
 ## only scan if run control enabled
