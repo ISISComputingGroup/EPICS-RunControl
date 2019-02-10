@@ -1,0 +1,183 @@
+## Forces a re-issue of the action, normally it is only sent once 
+## this could be called from a separate check loop
+record(bo, "$(P)CS:$(MODE):SYNC:SP")
+{
+    field(DESC, "Sync $(MODE) Control status")
+	field(FLNK, "$(P)CS:$(MODE):_CALC2.PROC")
+}
+
+## name of set, stored in a PV as need to used as INLINK 
+record(stringin, "$(P)CS:$(MODE):_SETNAME")
+{
+	field(VAL, "$(MODE)")
+}
+
+record(aSub, "$(P)CS:$(MODE):_OUT:CNT")
+{
+    field(SNAM, "getSetItemCount")
+	field(INPA, "$(P)CS:$(MODE):_SETNAME")
+	field(FTA, "STRING")
+	field(OUTA, "$(P)CS:$(MODE):OUT:CNT PP")
+	field(FTVA, "ULONG")
+	field(FLNK, "$(P)CS:$(MODE):_CALC.PROC")
+	field(SCAN, "1 second")
+	field(PHAS, "2") # so it executes after individual pv range scans
+} 
+
+record(longin, "$(P)CS:$(MODE):OUT:CNT")
+{
+    field(VAL, "0")
+	field(FLNK, "$(P)CS:$(MODE):INRANGE:_CALC.PROC")
+	info(archive, "VAL")
+}
+
+record(calcout, "$(P)CS:$(MODE):INRANGE:_CALC")
+{
+    field(INPA, "$(P)CS:$(MODE):OUT:CNT NPP")
+	field(CALC, "A > 0 ? 0 : 1")
+	field(OOPT, "On Change")
+	field(DOPT, "Use CALC")
+	field(OUT, "$(P)CS:$(MODE):INRANGE PP")
+}	
+
+record(bi, "$(P)CS:$(MODE):INRANGE")
+{
+    field(VAL, "1")
+    field(ZNAM, "NO")
+    field(ONAM, "YES")
+	field(FLNK, "$(P)CS:$(MODE):_OUT:LIST.PROC")
+	info(archive, "VAL")
+}
+
+record(aSub, "$(P)CS:$(MODE):_OUT:LIST")
+{
+    field(SNAM, "getSetItems")
+	field(INPA, "$(P)CS:$(MODE):_SETNAME")
+	field(FTA, "STRING")
+	field(OUTA, "$(P)CS:$(MODE):OUT:LIST PP")
+	field(FTVA, "CHAR")
+	field(NOVA, "4096")
+	field(FTVB, "ULONG")
+} 
+
+record(waveform, "$(P)CS:$(MODE):OUT:LIST")
+{
+	field(NELM, "4096")
+	field(FTVL, "CHAR")
+}
+
+## show number of seconds out of range
+record(ai, "$(P)CS:$(MODE):OUT:TIME")
+{
+    field(VAL, "0")
+    field(DESC, "Time out of range")
+	field(EGU, "s")
+	field(PREC, "1")
+}
+
+## show number of seconds in range
+record(ai, "$(P)CS:$(MODE):IN:TIME")
+{
+    field(VAL, "0")
+    field(DESC, "Time in range")
+	field(EGU, "s")
+	field(PREC, "1")
+}
+
+## calculate number of seconds out of range
+record(calcout, "$(P)CS:$(MODE):OUT:TIME:_CALC")
+{
+    field(INPA, "$(P)CS:$(MODE):OUT:CNT NPP")
+    field(INPB, "$(P)CS:$(MODE):OUT:TIME NPP")
+	field(CALC, "A > 0 ? B + 1 : 0")
+	field(OOPT, "On Change")
+    field(OUT, "$(P)CS:$(MODE):OUT:TIME PP")
+    field(SCAN, "1 second")
+	field(PHAS, "3")
+}
+
+## calculate number of seconds in range
+record(calcout, "$(P)CS:$(MODE):IN:TIME:_CALC")
+{
+    field(INPA, "$(P)CS:$(MODE):OUT:CNT NPP")
+    field(INPB, "$(P)CS:$(MODE):IN:TIME NPP")
+	field(CALC, "A > 0 ? 0 : B + 1")
+	field(OOPT, "On Change")
+    field(OUT, "$(P)CS:$(MODE):IN:TIME PP")
+    field(SCAN, "1 second")
+	field(PHAS, "3")
+}
+
+record(ao, "$(P)CS:$(MODE):OUT:DELAY")
+{
+    field(DESC, "$(MODE) out action delay")
+	field(PREC, "2")
+    info(autosaveFields, "VAL")
+}
+
+record(ao, "$(P)CS:$(MODE):IN:DELAY")
+{
+    field(DESC, "$(MODE) in action delay")
+	field(PREC, "2")
+    info(autosaveFields, "VAL")
+}
+
+## four potemntial states:
+##  in range for indelay amount of time      
+##  in range but for less than indelay amount of time 
+##  out of range but for less than outdelay amount of time
+##  out of range but for outdelay amount of time
+## the middle two (in/out but less than delay) are equivalent for our 
+## purpose as not action needs to be performed, so treat as 3 states
+## for purpose of triggering transitions
+## 2=out,1=in,0=transition
+record(calcout, "$(P)CS:$(MODE):_CALC")
+{
+    field(INPA, "$(P)CS:$(MODE):OUT:CNT NPP")
+	field(INPB, "$(P)CS:$(MODE):OUT:TIME NPP")
+	field(INPC, "$(P)CS:$(MODE):IN:TIME NPP")
+	field(INPD, "$(P)CS:$(MODE):OUT:DELAY NPP")
+	field(INPE, "$(P)CS:$(MODE):IN:DELAY NPP")
+	field(CALC, "(A>0&&B>=D)?2:((A==0&&C>=E)?1:0)")
+	field(OOPT, "On Change")
+	field(OCAL, "1")
+	field(DOPT, "Use OCAL")
+	field(OUT, "$(P)CS:$(MODE):_CALC2.PROC PP")
+	field(SCAN, "1 second")
+	field(PHAS, "4")
+}	
+
+## this is a bit of a duplicate of above, but is separated
+## so it can be called as part of a sync
+## also state numbers are different for seq record usage
+## 2=out,1=in,0=transition
+record(calcout, "$(P)CS:$(MODE):_CALC2")
+{
+    field(INPA, "$(P)CS:$(MODE):OUT:CNT NPP")
+	field(INPB, "$(P)CS:$(MODE):OUT:TIME NPP")
+	field(INPC, "$(P)CS:$(MODE):IN:TIME NPP")
+	field(INPD, "$(P)CS:$(MODE):OUT:DELAY NPP")
+	field(INPE, "$(P)CS:$(MODE):IN:DELAY NPP")
+	field(CALC, "(A>0&&B>=D)?2:((A==0&&C>=E)?1:0)")
+	field(OOPT, "Every Time")
+	field(DOPT, "Use CALC")
+	field(OUT, "$(P)CS:$(MODE):_SEQ.SELN")
+	field(FLNK, "$(P)CS:$(MODE):_SEQ.PROC")
+}	
+
+record(seq, "$(P)CS:$(MODE):_SEQ")
+{
+    field(SELM, "Mask")
+	field(DOL1, 1)
+	field(DOL2, 1)
+	field(LNK1, "$(IN_ACTION=$(P)CS:$(MODE):DUMMYACT:IN) PP")
+	field(LNK2, "$(OUT_ACTION=$(P)CS:$(MODE):DUMMYACT:OUT) PP")
+}
+
+record(ai, "$(P)CS:$(MODE):DUMMYACT:IN")
+{
+}
+
+record(ai, "$(P)CS:$(MODE):DUMMYACT:OUT")
+{
+}
