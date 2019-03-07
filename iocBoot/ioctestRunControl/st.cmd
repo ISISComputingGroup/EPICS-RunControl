@@ -24,12 +24,9 @@ testRunControl_registerRecordDeviceDriver pdbbase
 dbLoadRecords("db/testRunControl.db","P=$(MYPVPREFIX),N=TEST1")
 dbLoadRecords("db/testRunControl.db","P=$(MYPVPREFIX),N=TEST2")
 # add run control
-dbLoadRecords("db/runcontrolMgr.db","P=$(MYPVPREFIX)")
-dbLoadRecords("db/runcontrol.db","P=$(MYPVPREFIX),PV=$(MYPVPREFIX)TEST1")
-dbLoadRecords("db/runcontrol.db","P=$(MYPVPREFIX),PV=$(MYPVPREFIX)TEST2")
-dbLoadRecords("db/gencontrolMgr.db","P=$(MYPVPREFIX),MODE=DC")
-dbLoadRecords("db/gencontrol.db","P=$(MYPVPREFIX),PV=$(MYPVPREFIX)TEST1,MODE=DC")
-dbLoadRecords("db/gencontrol.db","P=$(MYPVPREFIX),PV=$(MYPVPREFIX)TEST2,MODE=DC")
+dbLoadRecords("db/gencontrolMgr.db","P=$(MYPVPREFIX),MODE=RC")
+dbLoadRecords("db/gencontrol.db","P=$(MYPVPREFIX),PV=$(MYPVPREFIX)TEST1,MODE=RC")
+dbLoadRecords("db/gencontrol.db","P=$(MYPVPREFIX),PV=$(MYPVPREFIX)TEST2,MODE=RC")
 
 ##ISIS## Stuff that needs to be done after all records are loaded but before iocInit is called 
 < $(IOCSTARTUP)/preiocinit.cmd
