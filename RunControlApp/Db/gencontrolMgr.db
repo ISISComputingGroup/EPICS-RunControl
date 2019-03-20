@@ -62,8 +62,20 @@ record(aSub, "$(P)CS:$(MODE):_OUT:LIST")
 
 record(waveform, "$(P)CS:$(MODE):OUT:LIST")
 {
+    field(DESC, "Out of range PVS")
 	field(NELM, "4096")
 	field(FTVL, "CHAR")
+	field(FLNK, "$(P)CS:$(MODE):OUT:_PRINT.PROC")
+}
+
+## log out of range PVs for blocks to IOC log file
+record(printf, "$(P)CS:$(MODE):OUT:_PRINT")
+{
+    field(INP0, "$(P)CS:$(MODE):OUT:LIST NPP")
+    field(FMT, "Out of range PVs: %ls")
+	field(SIZV, "4096")
+	field(OUT, "@errlog") # or @stdout ?
+	field(DTYP, "stdio")
 }
 
 ## show number of seconds out of range
