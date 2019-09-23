@@ -62,18 +62,17 @@ record(sseq, "$(PV):$(MODE):_SEQ")
 {
     field(SELM, "Mask")
 	field(STR1, "NO")
-	field(STR2, "1")
+	field(STR2, "$(PV)")
 	field(STR3, "YES")
-	field(STR4, "1")
+	field(STR4, "$(PV)")
 	field(LNK1, "$(PV):$(MODE):INRANGE PP")
-	field(LNK2, "$(PV):$(MODE):_OUT.PROC PP")
+	field(LNK2, "$(PV):$(MODE):_OUT PP")
 	field(LNK3, "$(PV):$(MODE):INRANGE PP")
-	field(LNK4, "$(PV):$(MODE):_IN.PROC PP")
+	field(LNK4, "$(PV):$(MODE):_IN PP")
 }
 
 record(waveform, "$(PV):$(MODE):_OUT")
 {
-    field(INP, "$(PV).NAME$")
 	field(NELM, "256")
 	field(FTVL, "CHAR")
 	field(FLNK, "$(PV):$(MODE):_OUT:DO.PROC")
@@ -93,7 +92,6 @@ record(aSub, "$(PV):$(MODE):_OUT:DO")
 
 record(waveform, "$(PV):$(MODE):_IN")
 {
-    field(INP, "$(PV).NAME$")
 	field(NELM, "256")
 	field(FTVL, "CHAR")
 	field(FLNK, "$(PV):$(MODE):_IN:DO.PROC")
