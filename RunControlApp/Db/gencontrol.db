@@ -20,7 +20,7 @@ record(bo, "$(PV):$(MODE):ENABLE")
 	field(ZNAM, "NO")
 	field(ONAM, "YES")
 	field(VAL, 0)
-	field(FLNK, "$(PV):$(MODE):_CALC")
+	field(FLNK, "$(PV):$(MODE):_CALC_RANGE")
     info(autosaveFields, "VAL")
 	info(archive, "VAL")
 }
@@ -34,29 +34,52 @@ record(bi, "$(PV):$(MODE):INRANGE")
 	info(archive, "VAL")
 }
 
+record(bo, "$(PV):$(MODE):SUSPEND_ON_INVALID")
+{
+    field(DESC, "$(MODE) suspend on invalid")
+	field(ZNAM, "NO")
+	field(ONAM, "YES")
+	field(VAL, "0")
+	info(archive, "VAL")
+}
+
 ## only scan if control enabled
 record(bo, "$(PV):$(MODE):_CALCSCAN")
 {
     field(SCAN, "1 second")
 	field(SDIS, "$(PV):$(MODE):ENABLE")
 	field(DISV, "0")
-	field(FLNK, "$(PV):$(MODE):_CALC")
+	field(FLNK, "$(PV):$(MODE):_CALC_RANGE")
 }
 
-## for a selection record: 56 means fire output 4 5 6; 7 means fire outputs 1 2 3
-## for a selection record: 12 means fire output 3 4; 3 means fire outputs 1 2
-record(calcout, "$(PV):$(MODE):_CALC")
+record(calcout, "$(PV):$(MODE):_CALC_RANGE")
 {
     field(INPA, "$(PV)")
     field(INPB, "$(PV):$(MODE):LOW")
     field(INPC, "$(PV):$(MODE):HIGH")
     field(INPD, "$(PV):$(MODE):ENABLE")
-	field(CALC, "((D=0)||(A>=B&&A<=C))?12:3")
+    field(INPE, "$(PV).SEVR")
+    field(INPF, "$(PV):$(MODE):_CALC_RANGE.INAV")
+	field(CALC, "((D=0)||(A>=B&&A<=C))?1:0")
+	field(OOPT, "Every Time")
+	field(DOPT, "Use CALC")
+	field(OUT, "$(PV):$(MODE):_CALC_INVALID.A")
+	field(FLNK, "$(PV):$(MODE):_CALC_INVALID")
+}	
+
+## for a selection record: 56 means fire output 4 5 6; 7 means fire outputs 1 2 3
+## for a selection record: 12 means fire output 3 4; 3 means fire outputs 1 2
+record(calcout, "$(PV):$(MODE):_CALC_INVALID") {
+    field(INPA, "")  # Pushed from $(PV):$(MODE):_CALC_RANGE
+    field(INPB, "$(PV).SEVR")  # Detect severity of linked PV
+    field(INPC, "$(PV):$(MODE):_CALC_RANGE.INAV")  # Detect completely disconnected linked PV
+    field(INPD, "$(PV):$(MODE):SUSPEND_ON_INVALID")
+    field(CALC, "D?((B<3&&C!=0)?(A?12:3):3):(A?12:3)")
 	field(OOPT, "Every Time")
 	field(DOPT, "Use CALC")
 	field(OUT, "$(PV):$(MODE):_SEQ.SELN")
 	field(FLNK, "$(PV):$(MODE):_SEQ.PROC")
-}	
+}
 
 record(sseq, "$(PV):$(MODE):_SEQ")
 {
