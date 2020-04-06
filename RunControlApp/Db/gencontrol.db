@@ -20,7 +20,7 @@ record(bo, "$(PV):$(MODE):ENABLE")
 	field(ZNAM, "NO")
 	field(ONAM, "YES")
 	field(VAL, 0)
-	field(FLNK, "$(PV):$(MODE):SUSPEND_ON_INVALID")
+	field(FLNK, "$(PV):$(MODE):SOI")
     info(autosaveFields, "VAL")
 	info(archive, "VAL")
 }
@@ -34,7 +34,7 @@ record(bi, "$(PV):$(MODE):INRANGE")
 	info(archive, "VAL")
 }
 
-record(bo, "$(PV):$(MODE):SUSPEND_ON_INVALID")
+record(bo, "$(PV):$(MODE):SOI")
 {
     field(DESC, "$(MODE) suspend on invalid")
 	field(ZNAM, "NO")
@@ -84,7 +84,7 @@ record(calcout, "$(PV):$(MODE):_CALC")
     field(INPC, "$(PV):$(MODE):HIGH")
     field(INPD, "$(PV):$(MODE):ENABLE")
     field(INPE, "")  # Written from $(PV):$(MODE):_SEVR_CHECK
-    field(INPF, "$(PV):$(MODE):SUSPEND_ON_INVALID")
+    field(INPF, "$(PV):$(MODE):SOI")
 	field(CALC, "((D=0)||(A>=B&&A<=C&&(E<3||F=0)))?12:3")
 	field(OOPT, "Every Time")
 	field(DOPT, "Use CALC")
