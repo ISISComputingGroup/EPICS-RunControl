@@ -37,10 +37,9 @@ record(calcout, "$(P)CS:$(MODE):CHANGE:_CALC")
 	field(CALC, "A")
 	field(OOPT, "On Change")
 	field(DOPT, "Use CALC")
-	field(OUT, "$(P)CS:$(MODE):_CHANGE PP")
+	field(OUT, "$(P)CS:$(MODE):_OUT:LIST.PROC PP")
 	field(FLNK, "$(P)CS:$(MODE):INRANGE:_CALC.PROC")
 }	
-
 
 record(calcout, "$(P)CS:$(MODE):INRANGE:_CALC")
 {
@@ -56,8 +55,12 @@ record(bi, "$(P)CS:$(MODE):INRANGE")
     field(VAL, "1")
     field(ZNAM, "NO")
     field(ONAM, "YES")
-	field(FLNK, "$(P)CS:$(MODE):_OUT:LIST.PROC")
 	info(archive, "VAL")
+}
+
+record(stringin, "$(P)CS:$(MODE):_STRIP_PREFIX")
+{
+    field(VAL, "$(P)CS:")
 }
 
 record(aSub, "$(P)CS:$(MODE):_OUT:LIST")
@@ -65,6 +68,8 @@ record(aSub, "$(P)CS:$(MODE):_OUT:LIST")
     field(SNAM, "getSetItems")
 	field(INPA, "$(P)CS:$(MODE):_SETNAME")
 	field(FTA, "STRING")
+	field(INPB, "$(P)CS:$(MODE):_STRIP_PREFIX")
+	field(FTB, "STRING")
 	field(OUTA, "$(P)CS:$(MODE):OUT:LIST PP")
 	field(FTVA, "CHAR")
 	field(NOVA, "4096")
@@ -83,10 +88,11 @@ record(waveform, "$(P)CS:$(MODE):OUT:LIST")
 record(printf, "$(P)CS:$(MODE):OUT:_PRINT")
 {
     field(INP0, "$(P)CS:$(MODE):OUT:LIST NPP")
-    field(FMT, "Out of range PVs: %ls")
+    field(FMT, "Out of range $(MODE) PVs: %ls")
 	field(SIZV, "4096")
 	field(OUT, "@errlog") # or @stdout ?
 	field(DTYP, "stdio")
+	field(FLNK, "$(P)CS:$(MODE):_CHANGE.PROC")
 }
 
 ## show number of seconds out of range
@@ -164,9 +170,14 @@ record(seq, "$(P)CS:$(MODE):_SEQ")
 	field(LNK2, "$(OUT_ACTION=$(P)CS:$(MODE):DUMMYACT:OUT) PP")
 }
 
-record(longin, "$(P)CS:$(MODE):_CHANGE")
+## only trigger change when out of range
+record(calcout, "$(P)CS:$(MODE):_CHANGE")
 {
-	field(FLNK, "$(CHANGE_ACTION=$(P)CS:$(MODE):DUMMYACT:CHANGE)")
+    field(INPA, "$(P)CS:$(MODE):OUT:CNT NPP")
+	field(CALC, "A")
+	field(OOPT, "When Non-zero")
+	field(DOPT, "Use CALC")
+	field(OUT, "$(CHANGE_ACTION=$(P)CS:$(MODE):DUMMYACT:CHANGE) PP")
 }
 
 record(ai, "$(P)CS:$(MODE):DUMMYACT:IN")

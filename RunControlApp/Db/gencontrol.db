@@ -49,17 +49,6 @@ record(ai, "$(PV):$(MODE):IN:TIME")
 	field(PREC, "1")
 }
 
-record(bo, "$(PV):$(MODE):ENABLE")
-{
-    field(DESC, "$(MODE) control enable")
-	field(ZNAM, "NO")
-	field(ONAM, "YES")
-	field(VAL, 0)
-	field(FLNK, "$(PV):$(MODE):SOI")
-    info(autosaveFields, "VAL")
-	info(archive, "VAL")
-}
-
 record(bi, "$(PV):$(MODE):INRANGE")
 {
     field(DESC, "$(MODE) control in range")
@@ -75,6 +64,21 @@ record(bo, "$(PV):$(MODE):SOI")
 	field(ZNAM, "NO")
 	field(ONAM, "YES")
 	field(VAL, "0")
+    info(autosaveFields, "VAL")
+	info(archive, "VAL")
+}
+
+## we forward link into the _CALCSCAN chain
+## to make sure if run control is disabled we process
+## and set in range
+record(bo, "$(PV):$(MODE):ENABLE")
+{
+    field(DESC, "$(MODE) control enable")
+	field(ZNAM, "NO")
+	field(ONAM, "YES")
+	field(VAL, 0)
+	field(PINI, "YES")
+	field(FLNK, "$(PV):$(MODE):_SEVR_CHECK.PROC CA")
     info(autosaveFields, "VAL")
 	info(archive, "VAL")
 }
@@ -205,7 +209,8 @@ record(calcout, "$(PV):$(MODE):_IN:CALC")
 {
     field(INPA, "$(PV):$(MODE):IN:TIME NPP")     
 	field(INPB, "$(PV):$(MODE):IN:DELAY NPP")
-	field(CALC, "A>B?1:0")
+    field(INPC, "$(PV):$(MODE):ENABLE NPP")
+	field(CALC, "((C=0)||(A>B))?1:0")
 	field(OOPT, "When Non-zero")
 	field(OCAL, "1")
 	field(DOPT, "Use OCAL")
