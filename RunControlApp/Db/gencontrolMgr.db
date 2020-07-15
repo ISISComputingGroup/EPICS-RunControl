@@ -58,9 +58,10 @@ record(bi, "$(P)CS:$(MODE):INRANGE")
 	info(archive, "VAL")
 }
 
+## prefix to strip from PV name in messages about out of range values
 record(stringin, "$(P)CS:$(MODE):_STRIP_PREFIX")
 {
-    field(VAL, "$(P)CS:")
+    field(VAL, "$(P)CS:SB:")
 }
 
 record(aSub, "$(P)CS:$(MODE):_OUT:LIST")
