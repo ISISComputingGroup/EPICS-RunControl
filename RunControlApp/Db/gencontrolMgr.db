@@ -19,17 +19,27 @@ record(aSub, "$(P)CS:$(MODE):_OUT:CNT")
 	field(FTA, "STRING")
 	field(OUTA, "$(P)CS:$(MODE):OUT:CNT PP")
 	field(FTVA, "ULONG")
-	field(FLNK, "$(P)CS:$(MODE):_CALC.PROC")
 	field(SCAN, "1 second")
 	field(PHAS, "2") # so it executes after individual pv range scans
+	field(FLNK, "$(P)CS:$(MODE):_CALC.PROC")
 } 
 
 record(longin, "$(P)CS:$(MODE):OUT:CNT")
 {
     field(VAL, "0")
-	field(FLNK, "$(P)CS:$(MODE):INRANGE:_CALC.PROC")
+	field(FLNK, "$(P)CS:$(MODE):CHANGE:_CALC.PROC")
 	info(archive, "VAL")
 }
+
+record(calcout, "$(P)CS:$(MODE):CHANGE:_CALC")
+{
+    field(INPA, "$(P)CS:$(MODE):OUT:CNT NPP")
+	field(CALC, "A")
+	field(OOPT, "On Change")
+	field(DOPT, "Use CALC")
+	field(OUT, "$(P)CS:$(MODE):_OUT:LIST.PROC PP")
+	field(FLNK, "$(P)CS:$(MODE):INRANGE:_CALC.PROC")
+}	
 
 record(calcout, "$(P)CS:$(MODE):INRANGE:_CALC")
 {
@@ -45,8 +55,13 @@ record(bi, "$(P)CS:$(MODE):INRANGE")
     field(VAL, "1")
     field(ZNAM, "NO")
     field(ONAM, "YES")
-	field(FLNK, "$(P)CS:$(MODE):_OUT:LIST.PROC")
 	info(archive, "VAL")
+}
+
+## prefix to strip from PV name in messages about out of range values
+record(stringin, "$(P)CS:$(MODE):_STRIP_PREFIX")
+{
+    field(VAL, "$(P)CS:SB:")
 }
 
 record(aSub, "$(P)CS:$(MODE):_OUT:LIST")
@@ -54,6 +69,8 @@ record(aSub, "$(P)CS:$(MODE):_OUT:LIST")
     field(SNAM, "getSetItems")
 	field(INPA, "$(P)CS:$(MODE):_SETNAME")
 	field(FTA, "STRING")
+	field(INPB, "$(P)CS:$(MODE):_STRIP_PREFIX")
+	field(FTB, "STRING")
 	field(OUTA, "$(P)CS:$(MODE):OUT:LIST PP")
 	field(FTVA, "CHAR")
 	field(NOVA, "4096")
@@ -72,10 +89,11 @@ record(waveform, "$(P)CS:$(MODE):OUT:LIST")
 record(printf, "$(P)CS:$(MODE):OUT:_PRINT")
 {
     field(INP0, "$(P)CS:$(MODE):OUT:LIST NPP")
-    field(FMT, "Out of range PVs: %ls")
+    field(FMT, "Out of range $(MODE) PVs: %ls")
 	field(SIZV, "4096")
 	field(OUT, "@errlog") # or @stdout ?
 	field(DTYP, "stdio")
+	field(FLNK, "$(P)CS:$(MODE):_CHANGE.PROC")
 }
 
 ## show number of seconds out of range
@@ -120,57 +138,24 @@ record(calcout, "$(P)CS:$(MODE):IN:TIME:_CALC")
 	field(PHAS, "3")
 }
 
-record(ao, "$(P)CS:$(MODE):OUT:DELAY")
-{
-    field(DESC, "$(MODE) out action delay")
-	field(PREC, "2")
-    info(autosaveFields, "VAL")
-}
 
-record(ao, "$(P)CS:$(MODE):IN:DELAY")
-{
-    field(DESC, "$(MODE) in action delay")
-	field(PREC, "2")
-    info(autosaveFields, "VAL")
-}
-
-## four potemntial states:
-##  in range for indelay amount of time      
-##  in range but for less than indelay amount of time 
-##  out of range but for less than outdelay amount of time
-##  out of range but for outdelay amount of time
-## the middle two (in/out but less than delay) are equivalent for our 
-## purpose as not action needs to be performed, so treat as 3 states
-## for purpose of triggering transitions
-## 2=out,1=in,0=transition
+## main calc
 record(calcout, "$(P)CS:$(MODE):_CALC")
 {
     field(INPA, "$(P)CS:$(MODE):OUT:CNT NPP")
-	field(INPB, "$(P)CS:$(MODE):OUT:TIME NPP")
-	field(INPC, "$(P)CS:$(MODE):IN:TIME NPP")
-	field(INPD, "$(P)CS:$(MODE):OUT:DELAY NPP")
-	field(INPE, "$(P)CS:$(MODE):IN:DELAY NPP")
-	field(CALC, "(A>0&&B>=D)?2:((A==0&&C>=E)?1:0)")
+	field(CALC, "A>0?1:0")
 	field(OOPT, "On Change")
 	field(OCAL, "1")
 	field(DOPT, "Use OCAL")
 	field(OUT, "$(P)CS:$(MODE):_CALC2.PROC PP")
-	field(SCAN, "1 second")
-	field(PHAS, "4")
 }	
 
 ## this is a bit of a duplicate of above, but is separated
 ## so it can be called as part of a sync
-## also state numbers are different for seq record usage
-## 2=out,1=in,0=transition
 record(calcout, "$(P)CS:$(MODE):_CALC2")
 {
     field(INPA, "$(P)CS:$(MODE):OUT:CNT NPP")
-	field(INPB, "$(P)CS:$(MODE):OUT:TIME NPP")
-	field(INPC, "$(P)CS:$(MODE):IN:TIME NPP")
-	field(INPD, "$(P)CS:$(MODE):OUT:DELAY NPP")
-	field(INPE, "$(P)CS:$(MODE):IN:DELAY NPP")
-	field(CALC, "(A>0&&B>=D)?2:((A==0&&C>=E)?1:0)")
+	field(CALC, "A>0?2:1")
 	field(OOPT, "Every Time")
 	field(DOPT, "Use CALC")
 	field(OUT, "$(P)CS:$(MODE):_SEQ.SELN")
@@ -186,10 +171,24 @@ record(seq, "$(P)CS:$(MODE):_SEQ")
 	field(LNK2, "$(OUT_ACTION=$(P)CS:$(MODE):DUMMYACT:OUT) PP")
 }
 
+## only trigger change when out of range
+record(calcout, "$(P)CS:$(MODE):_CHANGE")
+{
+    field(INPA, "$(P)CS:$(MODE):OUT:CNT NPP")
+	field(CALC, "A")
+	field(OOPT, "When Non-zero")
+	field(DOPT, "Use CALC")
+	field(OUT, "$(CHANGE_ACTION=$(P)CS:$(MODE):DUMMYACT:CHANGE) PP")
+}
+
 record(ai, "$(P)CS:$(MODE):DUMMYACT:IN")
 {
 }
 
 record(ai, "$(P)CS:$(MODE):DUMMYACT:OUT")
+{
+}
+
+record(ai, "$(P)CS:$(MODE):DUMMYACT:CHANGE")
 {
 }

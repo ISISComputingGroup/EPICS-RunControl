@@ -14,15 +14,39 @@ record(ao, "$(PV):$(MODE):LOW")
 	info(archive, "VAL")
 }
 
-record(bo, "$(PV):$(MODE):ENABLE")
+record(ao, "$(PV):$(MODE):OUT:DELAY")
 {
-    field(DESC, "$(MODE) control enable")
-	field(ZNAM, "NO")
-	field(ONAM, "YES")
-	field(VAL, 0)
-	field(FLNK, "$(PV):$(MODE):SOI")
+    field(DESC, "$(MODE) out action delay")
+	field(PREC, "2")
+	field(VAL, "2")
     info(autosaveFields, "VAL")
-	info(archive, "VAL")
+}
+
+record(ao, "$(PV):$(MODE):IN:DELAY")
+{
+    field(DESC, "$(MODE) in action delay")
+	field(PREC, "2")
+	field(VAL, "2")
+    info(autosaveFields, "VAL")
+}
+
+
+## show number of seconds out of range
+record(ai, "$(PV):$(MODE):OUT:TIME")
+{
+    field(VAL, "0")
+    field(DESC, "Time out of range")
+	field(EGU, "s")
+	field(PREC, "1")
+}
+
+## show number of seconds in range
+record(ai, "$(PV):$(MODE):IN:TIME")
+{
+    field(VAL, "0")
+    field(DESC, "Time in range")
+	field(EGU, "s")
+	field(PREC, "1")
 }
 
 record(bi, "$(PV):$(MODE):INRANGE")
@@ -40,16 +64,54 @@ record(bo, "$(PV):$(MODE):SOI")
 	field(ZNAM, "NO")
 	field(ONAM, "YES")
 	field(VAL, "0")
+    info(autosaveFields, "VAL")
 	info(archive, "VAL")
-    field(FLNK, "$(PV):$(MODE):_SEVR_CHECK")
 }
 
+## we forward link into the _CALCSCAN chain
+## to make sure if run control is disabled we process
+## and set in range
+record(bo, "$(PV):$(MODE):ENABLE")
+{
+    field(DESC, "$(MODE) control enable")
+	field(ZNAM, "NO")
+	field(ONAM, "YES")
+	field(VAL, 0)
+	field(PINI, "YES")
+	field(FLNK, "$(PV):$(MODE):_SEVR_CHECK.PROC CA")
+    info(autosaveFields, "VAL")
+	info(archive, "VAL")
+}
+
+## main processing loop
 ## only scan if control enabled
 record(bo, "$(PV):$(MODE):_CALCSCAN")
 {
     field(SCAN, "1 second")
 	field(SDIS, "$(PV):$(MODE):ENABLE")
 	field(DISV, "0")
+    field(FLNK, "$(PV):$(MODE):OUT:TIME:_CALC")
+}
+
+## calculate number of seconds out of range
+record(calcout, "$(PV):$(MODE):OUT:TIME:_CALC")
+{
+    field(INPA, "$(PV):$(MODE):INRANGE NPP")
+    field(INPB, "$(PV):$(MODE):OUT:TIME NPP")
+	field(CALC, "A = 0 ? B + 1 : 0")
+	field(OOPT, "On Change")
+    field(OUT, "$(PV):$(MODE):OUT:TIME PP")
+	field(FLNK, "$(PV):$(MODE):IN:TIME:_CALC")
+}
+
+## calculate number of seconds in range
+record(calcout, "$(PV):$(MODE):IN:TIME:_CALC")
+{
+    field(INPA, "$(PV):$(MODE):INRANGE NPP")
+    field(INPB, "$(PV):$(MODE):IN:TIME NPP")
+	field(CALC, "A = 0 ? 0 : B + 1")
+	field(OOPT, "On Change")
+    field(OUT, "$(PV):$(MODE):IN:TIME PP")
 	field(FLNK, "$(PV):$(MODE):_SEVR_CHECK")
 }
 
@@ -60,10 +122,10 @@ record(calcout, "$(PV):$(MODE):_SEVR_CHECK")
     field(OCAL, "A")
     field(IVOA, "Set output to IVOV")
     field(IVOV, "3")  # If INPA becomes disconnected treat like an INVALID alarm
-    field(FLNK, "$(PV):$(MODE):_VAL_CHECK")
     field(OOPT, "Every Time")
 	field(DOPT, "Use OCAL")
-    field(OUT, "$(PV):$(MODE):_CALC.E")
+    field(OUT, "$(PV):$(MODE):_CALC.E NPP")
+    field(FLNK, "$(PV):$(MODE):_VAL_CHECK")
 }
 
 record(calcout, "$(PV):$(MODE):_VAL_CHECK")
@@ -71,10 +133,10 @@ record(calcout, "$(PV):$(MODE):_VAL_CHECK")
     field(INPA, "$(PV)")
     field(CALC, "A")
     field(OCAL, "A")
-    field(FLNK, "$(PV):$(MODE):_CALC")
     field(OOPT, "Every Time")
 	field(DOPT, "Use OCAL")
-    field(OUT, "$(PV):$(MODE):_CALC.A")
+    field(OUT, "$(PV):$(MODE):_CALC.A NPP")
+    field(FLNK, "$(PV):$(MODE):_CALC")
 }
 
 record(calcout, "$(PV):$(MODE):_CALC")
@@ -89,8 +151,8 @@ record(calcout, "$(PV):$(MODE):_CALC")
 	field(OOPT, "Every Time")
 	field(DOPT, "Use CALC")
 	field(OUT, "$(PV):$(MODE):_SEQ.SELN")
-	field(FLNK, "$(PV):$(MODE):_SEQ.PROC")
     field(IVOA, "Continue normally")
+	field(FLNK, "$(PV):$(MODE):_SEQ.PROC")
 }
 
 record(sseq, "$(PV):$(MODE):_SEQ")
@@ -110,7 +172,18 @@ record(waveform, "$(PV):$(MODE):_OUT")
 {
 	field(NELM, "256")
 	field(FTVL, "CHAR")
-	field(FLNK, "$(PV):$(MODE):_OUT:DO.PROC")
+	field(FLNK, "$(PV):$(MODE):_OUT:CALC.PROC")
+}	
+
+record(calcout, "$(PV):$(MODE):_OUT:CALC")
+{
+    field(INPA, "$(PV):$(MODE):OUT:TIME NPP")     
+	field(INPB, "$(PV):$(MODE):OUT:DELAY NPP")
+	field(CALC, "A>B?1:0")
+	field(OOPT, "When Non-zero")
+	field(OCAL, "1")
+	field(DOPT, "Use OCAL")
+	field(OUT, "$(PV):$(MODE):_OUT:DO.PROC PP")
 }	
 
 record(aSub, "$(PV):$(MODE):_OUT:DO")
@@ -129,7 +202,19 @@ record(waveform, "$(PV):$(MODE):_IN")
 {
 	field(NELM, "256")
 	field(FTVL, "CHAR")
-	field(FLNK, "$(PV):$(MODE):_IN:DO.PROC")
+	field(FLNK, "$(PV):$(MODE):_IN:CALC.PROC")
+}	
+
+record(calcout, "$(PV):$(MODE):_IN:CALC")
+{
+    field(INPA, "$(PV):$(MODE):IN:TIME NPP")     
+	field(INPB, "$(PV):$(MODE):IN:DELAY NPP")
+    field(INPC, "$(PV):$(MODE):ENABLE NPP")
+	field(CALC, "((C=0)||(A>B))?1:0")
+	field(OOPT, "When Non-zero")
+	field(OCAL, "1")
+	field(DOPT, "Use OCAL")
+	field(OUT, "$(PV):$(MODE):_IN:DO.PROC PP")
 }	
 
 record(aSub, "$(PV):$(MODE):_IN:DO")
@@ -143,3 +228,4 @@ record(aSub, "$(PV):$(MODE):_IN:DO")
 	field(INPC, "$(PV):$(MODE):_IN.NELM") # NORD not set by CA
 	field(FTC, "ULONG")
 }
+
