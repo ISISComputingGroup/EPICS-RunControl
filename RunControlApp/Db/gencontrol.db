@@ -18,7 +18,7 @@ record(ao, "$(PV):$(MODE):OUT:DELAY")
 {
     field(DESC, "$(MODE) out action delay")
 	field(PREC, "2")
-	field(VAL, "2")
+	field(VAL, "0")
     info(autosaveFields, "VAL")
 }
 
@@ -26,7 +26,7 @@ record(ao, "$(PV):$(MODE):IN:DELAY")
 {
     field(DESC, "$(MODE) in action delay")
 	field(PREC, "2")
-	field(VAL, "2")
+	field(VAL, "0")
     info(autosaveFields, "VAL")
 }
 
