@@ -1,4 +1,5 @@
-## load with PVA defined as an alias to create for PV
+## either load with PVA defined as an alias to create for PV
+## or load with   NOALIAS=#   to comment out alias line  
 
 record(ao, "$(PV):$(MODE):HIGH")
 {
@@ -6,7 +7,7 @@ record(ao, "$(PV):$(MODE):HIGH")
 	field(PREC, "2")
     info(autosaveFields, "VAL")
 	info(archive, "VAL")
-	alias("$(PVA):$(MODE):HIGH")
+	$(NOALIAS=) alias("$(PVA=):$(MODE):HIGH")
 }
 
 record(ao, "$(PV):$(MODE):LOW")
@@ -15,7 +16,7 @@ record(ao, "$(PV):$(MODE):LOW")
 	field(PREC, "2")
     info(autosaveFields, "VAL")
 	info(archive, "VAL")
-	alias("$(PVA):$(MODE):LOW")
+	$(NOALIAS=) alias("$(PVA=):$(MODE):LOW")
 }
 record(ao, "$(PV):$(MODE):OUT:DELAY")
 {
@@ -23,7 +24,7 @@ record(ao, "$(PV):$(MODE):OUT:DELAY")
 	field(PREC, "2")
 	field(VAL, "0")
     info(autosaveFields, "VAL")
-	alias("$(PVA):$(MODE):OUT:DELAY")
+	$(NOALIAS=) alias("$(PVA=):$(MODE):OUT:DELAY")
 }
 
 record(ao, "$(PV):$(MODE):IN:DELAY")
@@ -32,7 +33,7 @@ record(ao, "$(PV):$(MODE):IN:DELAY")
 	field(PREC, "2")
 	field(VAL, "0")
     info(autosaveFields, "VAL")
-	alias("$(PVA):$(MODE):IN:DELAY")
+	$(NOALIAS=) alias("$(PVA=):$(MODE):IN:DELAY")
 }
 
 
@@ -43,7 +44,7 @@ record(ai, "$(PV):$(MODE):OUT:TIME")
     field(DESC, "Time out of range")
 	field(EGU, "s")
 	field(PREC, "1")
-	alias("$(PVA):$(MODE):OUT:TIME")
+	$(NOALIAS=) alias("$(PVA=):$(MODE):OUT:TIME")
 }
 
 ## show number of seconds in range
@@ -53,7 +54,7 @@ record(ai, "$(PV):$(MODE):IN:TIME")
     field(DESC, "Time in range")
 	field(EGU, "s")
 	field(PREC, "1")
-	alias("$(PVA):$(MODE):IN:TIME")
+	$(NOALIAS=) alias("$(PVA=):$(MODE):IN:TIME")
 }
 
 record(bi, "$(PV):$(MODE):INRANGE")
@@ -63,7 +64,7 @@ record(bi, "$(PV):$(MODE):INRANGE")
 	field(ONAM, "YES")
 	field(VAL, 1)
 	info(archive, "VAL")
-	alias("$(PVA):$(MODE):INRANGE")
+	$(NOALIAS=) alias("$(PVA=):$(MODE):INRANGE")
 }
 
 record(bo, "$(PV):$(MODE):SOI")
@@ -74,7 +75,7 @@ record(bo, "$(PV):$(MODE):SOI")
 	field(VAL, "0")
     info(autosaveFields, "VAL")
 	info(archive, "VAL")
-	alias("$(PVA):$(MODE):SOI")
+	$(NOALIAS=) alias("$(PVA=):$(MODE):SOI")
 }
 
 ## we forward link into the _CALCSCAN chain
@@ -90,7 +91,7 @@ record(bo, "$(PV):$(MODE):ENABLE")
 	field(FLNK, "$(PV):$(MODE):_SEVR_CHECK.PROC CA")
     info(autosaveFields, "VAL")
 	info(archive, "VAL")
-	alias("$(PVA):$(MODE):ENABLE")
+	$(NOALIAS=) alias("$(PVA=):$(MODE):ENABLE")
 }
 
 ## main processing loop
