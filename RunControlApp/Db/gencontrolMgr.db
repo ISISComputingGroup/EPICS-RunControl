@@ -162,13 +162,18 @@ record(calcout, "$(P)CS:$(MODE):_CALC2")
 	field(FLNK, "$(P)CS:$(MODE):_SEQ.PROC")
 }	
 
-record(seq, "$(P)CS:$(MODE):_SEQ")
+record(sseq, "$(P)CS:$(MODE):_SEQ")
 {
     field(SELM, "Mask")
 	field(DOL1, 1)
 	field(DOL2, 1)
-	field(LNK1, "$(IN_ACTION=$(P)CS:$(MODE):DUMMYACT:IN) PP")
-	field(LNK2, "$(OUT_ACTION=$(P)CS:$(MODE):DUMMYACT:OUT) PP")
+    
+    # Must use CA link type to be able to use WAITn - see https://epics.anl.gov/bcda/synApps/std/sseqRecord.html for details.
+	field(LNK1, "$(IN_ACTION=$(P)CS:$(MODE):DUMMYACT:IN) CA")
+    field(WAIT1, "Wait")
+    
+	field(LNK2, "$(OUT_ACTION=$(P)CS:$(MODE):DUMMYACT:OUT) CA")
+    field(WAIT2, "Wait")
 }
 
 ## only trigger change when out of range
