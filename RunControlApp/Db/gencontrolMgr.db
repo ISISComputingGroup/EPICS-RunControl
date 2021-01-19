@@ -165,7 +165,7 @@ record(calcout, "$(P)CS:$(MODE):_CALC2")
 record(seq, "$(P)CS:$(MODE):_SEQ")
 {
     field(SELM, "Mask")
-	field(DOL1, 1)
+	field(DOL1, 0)
 	field(DOL2, 1)
 	field(LNK1, "$(IN_ACTION=$(P)CS:$(MODE):DUMMYACT:IN) PP")
 	field(LNK2, "$(OUT_ACTION=$(P)CS:$(MODE):DUMMYACT:OUT) PP")
