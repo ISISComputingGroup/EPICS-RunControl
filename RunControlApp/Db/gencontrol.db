@@ -166,23 +166,31 @@ record(calcout, "$(PV):$(MODE):_CALC")
 	field(FLNK, "$(PV):$(MODE):_SEQ.PROC")
 }
 
+record(lsi, "$(PV):$(MODE):_PVNAME")
+{
+    field(SIZV, 256)
+    field(INP, {const:"$(PV)"})
+#    field(INP, ["$(PV)"])
+}
+
 record(sseq, "$(PV):$(MODE):_SEQ")
 {
     field(SELM, "Mask")
 	field(STR1, "NO")
-	field(STR2, "$(PV)")
+	field(STR2, "1")
 	field(STR3, "YES")
-	field(STR4, "$(PV)")
+	field(STR4, "1")
 	field(LNK1, "$(PV):$(MODE):INRANGE PP")
-	field(LNK2, "$(PV):$(MODE):_OUT PP")
+	field(LNK2, "$(PV):$(MODE):_OUT.PROC PP")
 	field(LNK3, "$(PV):$(MODE):INRANGE PP")
-	field(LNK4, "$(PV):$(MODE):_IN PP")
+	field(LNK4, "$(PV):$(MODE):_IN.PROC PP")
 }
 
 record(waveform, "$(PV):$(MODE):_OUT")
 {
 	field(NELM, "256")
 	field(FTVL, "CHAR")
+	field(INP, "$(PV):$(MODE):_PVNAME.VAL$")
 	field(FLNK, "$(PV):$(MODE):_OUT:CALC.PROC")
 }	
 
@@ -213,6 +221,7 @@ record(waveform, "$(PV):$(MODE):_IN")
 {
 	field(NELM, "256")
 	field(FTVL, "CHAR")
+	field(INP, "$(PV):$(MODE):_PVNAME.VAL$")
 	field(FLNK, "$(PV):$(MODE):_IN:CALC.PROC")
 }	
 
