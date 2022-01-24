@@ -1,12 +1,16 @@
 ## either load with PVA defined as an alias to create for PV
 ## or load with   NOALIAS=#   to comment out alias line  
 
+## load with   NOARCHIVE=#   to disable archiving of run control values
+## this is likely only needed on NDADETMON as it does not need run control and
+## having a lot of blocks this slows doen archive engine startup
+
 record(ao, "$(PV):$(MODE):HIGH")
 {
     field(DESC, "$(MODE) Control high limit")
 	field(PREC, "2")
     info(autosaveFields, "VAL")
-	info(archive, "VAL")
+	$(NOARCHIVE=) info(archive, "VAL")
 	$(NOALIAS=) alias("$(PVA=):$(MODE):HIGH")
 }
 
@@ -15,7 +19,7 @@ record(ao, "$(PV):$(MODE):LOW")
     field(DESC, "$(MODE) control low limit")
 	field(PREC, "2")
     info(autosaveFields, "VAL")
-	info(archive, "VAL")
+	$(NOARCHIVE=) info(archive, "VAL")
 	$(NOALIAS=) alias("$(PVA=):$(MODE):LOW")
 }
 record(ao, "$(PV):$(MODE):OUT:DELAY")
@@ -63,7 +67,7 @@ record(bi, "$(PV):$(MODE):INRANGE")
 	field(ZNAM, "NO")
 	field(ONAM, "YES")
 	field(VAL, 1)
-	info(archive, "VAL")
+	$(NOARCHIVE=) info(archive, "VAL")
 	$(NOALIAS=) alias("$(PVA=):$(MODE):INRANGE")
 }
 
@@ -74,7 +78,7 @@ record(bo, "$(PV):$(MODE):SOI")
 	field(ONAM, "YES")
 	field(VAL, "0")
     info(autosaveFields, "VAL")
-	info(archive, "VAL")
+	$(NOARCHIVE=) info(archive, "VAL")
 	$(NOALIAS=) alias("$(PVA=):$(MODE):SOI")
 }
 
@@ -90,7 +94,7 @@ record(bo, "$(PV):$(MODE):ENABLE")
 	field(PINI, "YES")
 	field(FLNK, "$(PV):$(MODE):_SEVR_CHECK.PROC CA")
     info(autosaveFields, "VAL")
-	info(archive, "VAL")
+	$(NOARCHIVE=) info(archive, "VAL")
 	$(NOALIAS=) alias("$(PVA=):$(MODE):ENABLE")
 }
 
