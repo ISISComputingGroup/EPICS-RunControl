@@ -1,9 +1,16 @@
+##
 ## either load with PVA defined as an alias to create for PV
 ## or load with   NOALIAS=#   to comment out alias line  
 
 ## load with   NOARCHIVE=#   to disable archiving of run control values
 ## this is likely only needed on NDADETMON as it does not need run control and
 ## having a lot of blocks this slows doen archive engine startup
+##
+## Do not create a PV that will be longer than $(PV):$(MODE):_CALCSCAN
+## keep all PV names as small as possible to not affect the maximum length
+## of $(PV) that can be passed
+##
+
 
 record(ao, "$(PV):$(MODE):HIGH")
 {
