@@ -1,12 +1,23 @@
+##
 ## either load with PVA defined as an alias to create for PV
 ## or load with   NOALIAS=#   to comment out alias line  
+
+## load with   NOARCHIVE=#   to disable archiving of run control values
+## this is likely only needed on NDADETMON as it does not need run control and
+## having a lot of blocks this slows doen archive engine startup
+##
+## Do not create a PV that will be longer than $(PV):$(MODE):_CALCSCAN
+## keep all PV names as small as possible to not affect the maximum length
+## of $(PV) that can be passed
+##
+
 
 record(ao, "$(PV):$(MODE):HIGH")
 {
     field(DESC, "$(MODE) Control high limit")
 	field(PREC, "2")
     info(autosaveFields, "VAL")
-	info(archive, "VAL")
+	$(NOARCHIVE=) info(archive, "VAL")
 	$(NOALIAS=) alias("$(PVA=):$(MODE):HIGH")
 }
 
@@ -15,7 +26,7 @@ record(ao, "$(PV):$(MODE):LOW")
     field(DESC, "$(MODE) control low limit")
 	field(PREC, "2")
     info(autosaveFields, "VAL")
-	info(archive, "VAL")
+	$(NOARCHIVE=) info(archive, "VAL")
 	$(NOALIAS=) alias("$(PVA=):$(MODE):LOW")
 }
 record(ao, "$(PV):$(MODE):OUT:DELAY")
@@ -63,7 +74,7 @@ record(bi, "$(PV):$(MODE):INRANGE")
 	field(ZNAM, "NO")
 	field(ONAM, "YES")
 	field(VAL, 1)
-	info(archive, "VAL")
+	$(NOARCHIVE=) info(archive, "VAL")
 	$(NOALIAS=) alias("$(PVA=):$(MODE):INRANGE")
 }
 
@@ -74,7 +85,7 @@ record(bo, "$(PV):$(MODE):SOI")
 	field(ONAM, "YES")
 	field(VAL, "0")
     info(autosaveFields, "VAL")
-	info(archive, "VAL")
+	$(NOARCHIVE=) info(archive, "VAL")
 	$(NOALIAS=) alias("$(PVA=):$(MODE):SOI")
 }
 
@@ -88,9 +99,9 @@ record(bo, "$(PV):$(MODE):ENABLE")
 	field(ONAM, "YES")
 	field(VAL, 0)
 	field(PINI, "YES")
-	field(FLNK, "$(PV):$(MODE):_SEVR_CHECK.PROC CA")
+	field(FLNK, "$(PV):$(MODE):_SEV_CHK.PROC CA")
     info(autosaveFields, "VAL")
-	info(archive, "VAL")
+	$(NOARCHIVE=) info(archive, "VAL")
 	$(NOALIAS=) alias("$(PVA=):$(MODE):ENABLE")
 }
 
@@ -101,32 +112,32 @@ record(bo, "$(PV):$(MODE):_CALCSCAN")
     field(SCAN, "1 second")
 	field(SDIS, "$(PV):$(MODE):ENABLE")
 	field(DISV, "0")
-    field(FLNK, "$(PV):$(MODE):OUT:TIME:_CALC")
+    field(FLNK, "$(PV):$(MODE):OUT:_TC")
 }
 
 ## calculate number of seconds out of range
-record(calcout, "$(PV):$(MODE):OUT:TIME:_CALC")
+record(calcout, "$(PV):$(MODE):OUT:_TC")
 {
     field(INPA, "$(PV):$(MODE):INRANGE NPP")
     field(INPB, "$(PV):$(MODE):OUT:TIME NPP")
 	field(CALC, "A = 0 ? B + 1 : 0")
 	field(OOPT, "On Change")
     field(OUT, "$(PV):$(MODE):OUT:TIME PP")
-	field(FLNK, "$(PV):$(MODE):IN:TIME:_CALC")
+	field(FLNK, "$(PV):$(MODE):IN:_TC")
 }
 
 ## calculate number of seconds in range
-record(calcout, "$(PV):$(MODE):IN:TIME:_CALC")
+record(calcout, "$(PV):$(MODE):IN:_TC")
 {
     field(INPA, "$(PV):$(MODE):INRANGE NPP")
     field(INPB, "$(PV):$(MODE):IN:TIME NPP")
 	field(CALC, "A = 0 ? 0 : B + 1")
 	field(OOPT, "On Change")
     field(OUT, "$(PV):$(MODE):IN:TIME PP")
-	field(FLNK, "$(PV):$(MODE):_SEVR_CHECK")
+	field(FLNK, "$(PV):$(MODE):_SEV_CHK")
 }
 
-record(calcout, "$(PV):$(MODE):_SEVR_CHECK")
+record(calcout, "$(PV):$(MODE):_SEV_CHK")
 {
     field(INPA, "$(PV).SEVR")
     field(CALC, "A")
@@ -136,10 +147,10 @@ record(calcout, "$(PV):$(MODE):_SEVR_CHECK")
     field(OOPT, "Every Time")
 	field(DOPT, "Use OCAL")
     field(OUT, "$(PV):$(MODE):_CALC.E NPP")
-    field(FLNK, "$(PV):$(MODE):_VAL_CHECK")
+    field(FLNK, "$(PV):$(MODE):_VAL_CHK")
 }
 
-record(calcout, "$(PV):$(MODE):_VAL_CHECK")
+record(calcout, "$(PV):$(MODE):_VAL_CHK")
 {
     field(INPA, "$(PV)")
     field(CALC, "A")
@@ -152,11 +163,11 @@ record(calcout, "$(PV):$(MODE):_VAL_CHECK")
 
 record(calcout, "$(PV):$(MODE):_CALC")
 {
-    field(INPA, "")  # Written from $(PV):$(MODE):_VAL_CHECK
+    field(INPA, "")  # Written from $(PV):$(MODE):_VAL_CHK
     field(INPB, "$(PV):$(MODE):LOW")
     field(INPC, "$(PV):$(MODE):HIGH")
     field(INPD, "$(PV):$(MODE):ENABLE")
-    field(INPE, "")  # Written from $(PV):$(MODE):_SEVR_CHECK
+    field(INPE, "")  # Written from $(PV):$(MODE):_SEV_CHK
     field(INPF, "$(PV):$(MODE):SOI")
 	field(CALC, "((D=0)||(A>=B&&A<=C&&(E<3||F=0)))?12:3")
 	field(OOPT, "Every Time")
@@ -166,23 +177,31 @@ record(calcout, "$(PV):$(MODE):_CALC")
 	field(FLNK, "$(PV):$(MODE):_SEQ.PROC")
 }
 
+record(lsi, "$(PV):$(MODE):_PVNAME")
+{
+    field(SIZV, 256)
+    field(INP, {const:"$(PV)"})
+#    field(INP, ["$(PV)"])
+}
+
 record(sseq, "$(PV):$(MODE):_SEQ")
 {
     field(SELM, "Mask")
 	field(STR1, "NO")
-	field(STR2, "$(PV)")
+	field(STR2, "1")
 	field(STR3, "YES")
-	field(STR4, "$(PV)")
+	field(STR4, "1")
 	field(LNK1, "$(PV):$(MODE):INRANGE PP")
-	field(LNK2, "$(PV):$(MODE):_OUT PP")
+	field(LNK2, "$(PV):$(MODE):_OUT.PROC PP")
 	field(LNK3, "$(PV):$(MODE):INRANGE PP")
-	field(LNK4, "$(PV):$(MODE):_IN PP")
+	field(LNK4, "$(PV):$(MODE):_IN.PROC PP")
 }
 
 record(waveform, "$(PV):$(MODE):_OUT")
 {
 	field(NELM, "256")
 	field(FTVL, "CHAR")
+	field(INP, "$(PV):$(MODE):_PVNAME.VAL$")
 	field(FLNK, "$(PV):$(MODE):_OUT:CALC.PROC")
 }	
 
@@ -213,6 +232,7 @@ record(waveform, "$(PV):$(MODE):_IN")
 {
 	field(NELM, "256")
 	field(FTVL, "CHAR")
+	field(INP, "$(PV):$(MODE):_PVNAME.VAL$")
 	field(FLNK, "$(PV):$(MODE):_IN:CALC.PROC")
 }	
 
