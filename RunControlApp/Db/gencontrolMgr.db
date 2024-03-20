@@ -1,9 +1,11 @@
 ## Forces a re-issue of the action, normally it is only sent once 
 ## this could be called from a separate check loop
+## PINI at startup so this is called initially
 record(bo, "$(P)CS:$(MODE):SYNC:SP")
 {
     field(DESC, "Sync $(MODE) Control status")
 	field(FLNK, "$(P)CS:$(MODE):_CALC2.PROC")
+	field(PINI, "YES")
 }
 
 ## name of set, stored in a PV as need to used as INLINK 
