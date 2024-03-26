@@ -4,6 +4,7 @@ record(bo, "$(P)CS:$(MODE):SYNC:SP")
 {
     field(DESC, "Sync $(MODE) Control status")
 	field(FLNK, "$(P)CS:$(MODE):_CALC2.PROC")
+
 }
 
 ## name of set, stored in a PV as need to used as INLINK 
@@ -152,6 +153,7 @@ record(calcout, "$(P)CS:$(MODE):_CALC")
 
 ## this is a bit of a duplicate of above, but is separated
 ## so it can be called as part of a sync
+## PINI at startup so this is called initially
 record(calcout, "$(P)CS:$(MODE):_CALC2")
 {
     field(INPA, "$(P)CS:$(MODE):OUT:CNT NPP")
@@ -160,6 +162,7 @@ record(calcout, "$(P)CS:$(MODE):_CALC2")
 	field(DOPT, "Use CALC")
 	field(OUT, "$(P)CS:$(MODE):_SEQ.SELN")
 	field(FLNK, "$(P)CS:$(MODE):_SEQ.PROC")
+	field(PINI, "YES")
 }	
 
 record(seq, "$(P)CS:$(MODE):_SEQ")
