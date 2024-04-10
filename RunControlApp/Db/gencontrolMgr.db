@@ -162,7 +162,7 @@ record(calcout, "$(P)CS:$(MODE):_CALC2")
 	field(DOPT, "Use CALC")
 	field(OUT, "$(P)CS:$(MODE):_SEQ.SELN")
 	field(FLNK, "$(P)CS:$(MODE):_SEQ.PROC")
-	field(PINI, "YES")
+	field(PINI, "$(PINI=NO)")
 }	
 
 record(seq, "$(P)CS:$(MODE):_SEQ")
