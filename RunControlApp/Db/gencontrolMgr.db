@@ -153,7 +153,9 @@ record(calcout, "$(P)CS:$(MODE):_CALC")
 
 ## this is a bit of a duplicate of above, but is separated
 ## so it can be called as part of a sync
-## PINI at startup so this is called initially
+## In some cases we will PINI at startup to make sure things are always in sync 
+## usually for run control but not for alerts as we don't want to send an
+## unnecessary "all ok" message
 record(calcout, "$(P)CS:$(MODE):_CALC2")
 {
     field(INPA, "$(P)CS:$(MODE):OUT:CNT NPP")
@@ -162,7 +164,7 @@ record(calcout, "$(P)CS:$(MODE):_CALC2")
 	field(DOPT, "Use CALC")
 	field(OUT, "$(P)CS:$(MODE):_SEQ.SELN")
 	field(FLNK, "$(P)CS:$(MODE):_SEQ.PROC")
-	field(PINI, "YES")
+	field(PINI, "$(PINI=NO)")
 }	
 
 record(seq, "$(P)CS:$(MODE):_SEQ")
